@@ -1,11 +1,10 @@
 from flask import Flask, request, render_template, jsonify
 from flask_cors import CORS
-from chatbot import Chatbot
+from chatbot import chatbot
 
 # Initialize Flask App
 app = Flask(__name__)
 CORS(app)
-chatbot = Chatbot()
 
 @app.route('/chatbot', methods=['POST'])
 def handle_prompt():
