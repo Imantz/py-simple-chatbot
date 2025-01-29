@@ -15,6 +15,6 @@ class Chatbot:
         self.conversation_history.append(response)
 
         return response
-    
+
 chatbot = Chatbot()
 
