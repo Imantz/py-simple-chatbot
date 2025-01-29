@@ -1,0 +1,59 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+venv/
+env/
+*.env
+*.venv
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Logs and debugging
+logs/
+*.log
+*.out
+*.err
+debug.log
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# MyPy
+.mypy_cache/
+.dmypy.json
+.pyre/
+
+# pytest
+.cache/
+
+# Django
+*.sqlite3
+db.sqlite3
+
+# Flask and other local environment files
+instance/
+*.pyc
+
+# VS Code
+.vscode/
+.history/
+
+# PyCharm
+.idea/
+*.iml
+
+# MacOS
+.DS_Store
+
+# System-specific files
+*.swp
+*.swo
+*~
