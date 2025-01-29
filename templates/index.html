@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chatbot</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+
+  <body class="bg-gray-100 flex items-center justify-center min-h-screen">
+    <main class="w-full max-w-md p-6 bg-white rounded-2xl shadow-lg">
+      <div class="chatbot">
+        <div class="chat-header text-center">
+          <h1 class="text-2xl font-bold text-gray-800">Chat with Me</h1>
+        </div>
+
+        <div id="messages-container" class="spacer h-64 overflow-y-auto border p-4 mt-4 bg-gray-50 rounded-lg shadow-inner"></div>
+        
+        <form id="message-form" class="chat-form flex mt-4">
+          <textarea id="message-input" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none" placeholder="Send a message..."></textarea>
+          <button type="submit" class="ml-2 bg-purple-500 text-white p-3 rounded-lg hover:bg-purple-600 transition">
+            ➤
+          </button> 
+        </form>
+      </div>
+    </main>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+  </body>
+</html>
