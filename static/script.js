@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const messagesContainer = document.getElementById("messages-container");
     const messageForm = document.getElementById("message-form");
     const messageInput = document.getElementById("message-input");
+    const micButton = document.getElementById("mic-button");
 
     const addMessage = (message, role) => {
         const messageElement = document.createElement("div");
@@ -13,7 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const sendMessage = async (message) => {
         addMessage(message, "user");
-        
+
         const loadingElement = document.createElement("p");
         loadingElement.innerText = "Loading...";
         loadingElement.className = "text-gray-500 text-sm italic mt-2";
@@ -26,7 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ prompt: message })
             });
-            
+
             const data = await response.text();
             loadingElement.remove();
             addMessage(data, "bot");
@@ -44,4 +45,32 @@ document.addEventListener("DOMContentLoaded", () => {
             await sendMessage(message);
         }
     });
+
+    // Microphone functionality
+    if ("webkitSpeechRecognition" in window) {
+        const recognition = new webkitSpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = "en-US";
+
+        micButton.addEventListener("click", () => {
+            recognition.start();
+            micButton.classList.add("bg-red-500"); // Indicate recording
+        });
+
+        recognition.onresult = (event) => {
+            const transcript = event.results[0][0].transcript;
+            if (transcript.trim() !== "") {
+                sendMessage(transcript); // Send the recognized text automatically
+            }
+        };
+
+        recognition.onend = () => {
+            micButton.classList.remove("bg-red-500"); // Reset button color
+        };
+
+    } else {
+        micButton.disabled = true;
+        micButton.title = "Speech recognition not supported in this browser";
+    }
 });
