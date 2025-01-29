@@ -8,4 +8,9 @@ python3 -m pip install -r requirements.txt
 flask run
 ```
 
+#### Development mode
+```
+FLASK_APP=app.py FLASK_ENV=development flask run
+```
+
 Visit: http://127.0.0.1:5000
