@@ -25,12 +25,12 @@ document.addEventListener("DOMContentLoaded", () => {
             const response = await fetch("http://127.0.0.1:5000/chatbot", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ prompt: message })
+                body: JSON.stringify({ prompt: message }),
             });
 
-            const data = await response.text();
+            const data = await response.json();
             loadingElement.remove();
-            addMessage(data, "bot");
+            addMessage(data.response, "bot");
         } catch (error) {
             loadingElement.remove();
             addMessage("Error: Unable to fetch response", "bot");
@@ -46,31 +46,81 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // Microphone functionality
-    if ("webkitSpeechRecognition" in window) {
-        const recognition = new webkitSpeechRecognition();
+    const startWebSpeechRecognition = () => {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) {
+            addMessage("Speech recognition not supported", "bot");
+            return;
+        }
+
+        const recognition = new SpeechRecognition();
         recognition.continuous = false;
         recognition.interimResults = false;
         recognition.lang = "en-US";
 
-        micButton.addEventListener("click", () => {
-            recognition.start();
-            micButton.classList.add("bg-red-500"); // Indicate recording
-        });
+        recognition.start();
+        micButton.classList.add("bg-red-500"); // Indicate recording
 
         recognition.onresult = (event) => {
-            const transcript = event.results[0][0].transcript;
-            if (transcript.trim() !== "") {
-                sendMessage(transcript); // Send the recognized text automatically
-            }
+            const transcript = event.results[0][0].transcript.trim();
+            if (transcript) sendMessage(transcript); // Send recognized text
         };
 
-        recognition.onend = () => {
-            micButton.classList.remove("bg-red-500"); // Reset button color
+        recognition.onerror = () => {
+            addMessage("Speech recognition error", "bot");
         };
 
-    } else {
-        micButton.disabled = true;
-        micButton.title = "Speech recognition not supported in this browser";
+        recognition.onend = () => micButton.classList.remove("bg-red-500"); // Reset button color
+    };
+
+    const startHuggingFaceSTT = async () => {
+        micButton.classList.add("bg-red-500"); // Indicate recording
+        await recordAndSendAudio();
+        micButton.classList.remove("bg-red-500"); // Reset button color
+    };
+
+    micButton.addEventListener("click", () => {
+        if ("SpeechRecognition" in window || "webkitSpeechRecognition" in window) {
+            startWebSpeechRecognition();
+        } else {
+            startHuggingFaceSTT();
+        }
+    });
+
+    async function recordAndSendAudio() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const mediaRecorder = new MediaRecorder(stream);
+            const audioChunks = [];
+
+            mediaRecorder.ondataavailable = (event) => {
+                audioChunks.push(event.data);
+            };
+
+            mediaRecorder.onstop = async () => {
+                const audioBlob = new Blob(audioChunks, { type: "audio/wav" });
+                const formData = new FormData();
+                formData.append("audio", audioBlob);
+
+                stream.getTracks().forEach((track) => track.stop());
+
+                const response = await fetch("http://127.0.0.1:5000/transcribe", {
+                    method: "POST",
+                    body: formData,
+                });
+
+                const result = await response.json();
+                if (result.transcription) {
+                    sendMessage(result.transcription);
+                } else {
+                    addMessage("Error: Could not transcribe audio", "bot");
+                }
+            };
+
+            mediaRecorder.start();
+            setTimeout(() => mediaRecorder.stop(), 5000); // Record for 5 seconds
+        } catch (error) {
+            addMessage("Microphone access denied", "bot");
+        }
     }
 });
